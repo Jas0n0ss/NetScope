@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="NetScope">
+  <defs>
+    <linearGradient id="bg" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#131C2C"/>
+      <stop offset="1" stop-color="#05080E"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="18" y1="46" x2="50" y2="16" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#34D399"/>
+      <stop offset="1" stop-color="#38BDF8"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#bg)"/>
+  <rect x="0.75" y="0.75" width="62.5" height="62.5" rx="15.25" fill="none" stroke="#ffffff" stroke-opacity="0.09"/>
+  <circle cx="32" cy="32" r="18" fill="none" stroke="url(#beam)" stroke-opacity="0.32" stroke-width="1.5"/>
+  <circle cx="32" cy="32" r="11" fill="none" stroke="url(#beam)" stroke-opacity="0.62" stroke-width="1.5"/>
+  <path d="M32 32L48.5 19.5" stroke="url(#beam)" stroke-width="2.2" stroke-linecap="round"/>
+  <circle cx="32" cy="32" r="3.4" fill="url(#beam)"/>
+  <circle cx="48.5" cy="19.5" r="2.6" fill="#4ADE80"/>
+  <circle cx="14" cy="42" r="1.9" fill="#38BDF8" fill-opacity="0.9"/>
+  <circle cx="44" cy="49" r="1.7" fill="#38BDF8" fill-opacity="0.65"/>
+</svg>

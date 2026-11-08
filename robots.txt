@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# NetScope performs every query in the visitor's browser.
+# The optional inspector API only serves public HTTP(S) resources.

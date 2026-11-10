@@ -43,18 +43,6 @@ A dedicated Email view covers both sides of mail delivery:
 - **Email DNS health** — MX, SPF, DKIM (configurable selector), DMARC, MTA-STS, TLS-RPT and BIMI, scored 0–100 with A–F grade and a combined dig transcript.
 - **dig output** — every DNS result includes a Unix `dig`-style transcript with header, question, answer and authority sections.
 
-### Website inspector
-
-The optional API fetches a public URL server-side and returns:
-
-| Area | Details |
-| --- | --- |
-| Response | Status, reason, final URL, redirect chain, round-trip time, content type, transferred bytes |
-| Security | HSTS, CSP, `X-Content-Type-Options`, clickjacking protection, Referrer-Policy, Permissions-Policy, COOP, CORP + a 0–100 score |
-| TLS | Subject, issuer, validity window, days remaining, SANs, serial, cipher, protocol, SHA-256 fingerprint |
-| Metadata | Title, description, canonical, robots, viewport, generator, Open Graph, Twitter card, favicon |
-| Headers | Every response header (cookies redacted) with copy/download |
-
 ### Network tools
 
 - **Subnet calculator** for IPv4 and IPv6 — network, broadcast, mask, wildcard, usable range, host count, class/scope, binary mask and reverse DNS.
@@ -63,10 +51,6 @@ The optional API fetches a public URL server-side and returns:
 - **Latency probe** — approximate round-trip to Cloudflare, Google, GitHub and this server with a relative chart.
 - **WebRTC leak check** — lists exposed ICE candidates and distinguishes public, local and mDNS addresses.
 - **Port reachability** — single TCP port check through the API, public hosts only.
-
-### Browser signals
-
-Everything a website can read about the client: browser/engine/OS, screen and viewport, DPR, locale, timezone, network hints, cookies, Do Not Track, storage quota, battery, logical cores, device memory, GPU renderer, WebGL, WebRTC, service workers and more. Copy or download the report.
 
 ## Quick start
 
@@ -159,62 +143,7 @@ curl "http://localhost:8080/api/inspect?url=https://example.com" | jq '.status, 
 curl "http://localhost:8080/api/smtp?host=smtp.gmail.com&port=587" | jq '.reachable, .capabilities.auth, .tls.days_remaining'
 ```
 
-## Project structure
-
-```text
-.
-├── index.html                 # App shell, icon sprite, dialogs
-├── assets/
-│   ├── css/app.css            # Design tokens, layout, components, responsive
-│   ├── js/
-│   │   ├── app.js             # Router, command palette, settings, theme
-│   │   ├── theme-boot.js      # Pre-paint theme selection (no flash)
-│   │   ├── lib/
-│   │   │   ├── core.js        # DOM, formatting, storage, toasts, clipboard
-│   │   │   ├── i18n.js        # EN/中文 dictionaries, DOM translation, locale
-│   │   │   ├── api.js         # IP, DoH, RDAP, inspector/SMTP API clients
-│   │   │   ├── dig.js         # dig-style transcript formatter
-│   │   │   └── tools.js       # Pure IP/CIDR/URL/security-header functions
-│   │   └── views/             # overview, lookup, dns, email, website, tools, browser
-│   ├── fonts/                 # Self-hosted Inter + JetBrains Mono
-│   └── img/                   # App icons
-├── pyapp/
-│   ├── app.py                 # Flask API + static server
-│   ├── requirements.txt
-│   └── Dockerfile
-├── tests/test_app.py          # Pytest suite
-├── Dockerfile                 # Full-stack image (non-root, healthcheck)
-├── Dockerfile.static          # Nginx static image
-├── docker-compose.yml
-├── nginx.conf
-└── .github/workflows/         # CI + GHCR build
-```
-
 The frontend uses native ES modules and has **no build step**. Fonts are self-hosted; data is fetched directly from the public services listed in Settings.
-
-## Security &amp; privacy
-
-- **No analytics, accounts or cookies.** Lookup history and settings live in `localStorage` and can be cleared from Settings.
-- **SSRF protection.** The inspector only accepts `http(s)`, resolves every host, rejects private/loopback/link-local/reserved/multicast addresses, re-validates every redirect and blocks credentials in URLs.
-- **Bounded fetches.** 5 redirects, 5s connect / 12s read timeouts, 2 MB body cap, 4 KB header cap.
-- **Cookie redaction.** `Set-Cookie` values are replaced before the report reaches the browser.
-- **Rate limits.** Sliding-window limits per client IP for inspect, SMTP, port and general endpoints.
-- **Read-only SMTP.** The probe only reads the banner and issues `EHLO`/`STARTTLS`/`QUIT`; it never sends `AUTH`, `MAIL`, `RCPT` or message data.
-- **TLS verification** is enabled and certificate details are reported without bypassing trust.
-- **Content-Security-Policy, COOP, nosniff, frame denial and Permissions-Policy** are sent by both the Flask and Nginx images.
-- **Static allowlist.** The API serves only `index.html`, `assets/`, the manifest and robots — never source, `.git` or Python files.
-
-Residual risk: DNS rebinding between validation and the outbound request is not fully preventable without pinning sockets. Keep the API on a network segment that cannot reach sensitive internal services, and do not expose it as an open proxy.
-
-## Keyboard shortcuts
-
-| Keys | Action |
-| --- | --- |
-| `⌘K` / `Ctrl K` | Command palette |
-| `1`–`7` | Switch views |
-| `/` | Focus the current search field |
-| `R` | Refresh the overview |
-| `Esc` | Close dialogs and the mobile drawer |
 
 ## Localization
 

@@ -57,13 +57,15 @@ Errors use the Flask envelope with an appropriate status:
 
 ## Limitations
 
-- **TLS is reconstructed from Certificate Transparency**, not from the live
-  handshake: Workers cannot read a peer certificate from `fetch()` or
-  `connect()`. `/api/tls` queries `https://crt.sh/?q=<host>&output=json`, picks
-  the newest still-valid certificate covering the host, and fetches
-  `https://crt.sh/?d=<id>` for the SHA-256 fingerprint. Consequences:
-  - `version` and `cipher` are always `""`, and `source` is
-    `"certificate-transparency"`.
+- **TLS is reconstructed, never read from the live handshake**: Workers cannot
+  read a peer certificate from `fetch()`, `connect()` or `node:tls` (`connect`
+  exists, `getPeerCertificate()` throws *not implemented* — verified). `/api/tls`
+  therefore asks, in order: the colo Cache API (1 h) → the SSL Labs cached
+  analysis (`fromCache=on`, 4 s, `source: "ssl-labs-cache"`) → Certificate
+  Transparency (`https://crt.sh/?q=<host>&output=json&exclude=expired&deduplicate=Y`,
+  parent-domain retry for wildcard-only hosts, `?d=<id>` for the fingerprint,
+  `source: "certificate-transparency"`). Consequences:
+  - `version` and `cipher` are always `""`; `source` says which log answered.
   - `serial` is crt.sh's `serial_number` (hex without separators; Flask returns
     the colon-separated DER serial).
   - Hosts without public CT entries (private CAs, many bare IPs) report

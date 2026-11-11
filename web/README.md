@@ -101,14 +101,16 @@ Functions in [`functions/`](functions/README.md) — no separate backend or conf
 | `GET` | `/api/health` · `/api/features` | Service heartbeat and capability list |
 | `GET` | `/api/ip` · `/ip` | Client public IP (JSON / plain text) |
 | `GET` | `/api/inspect?url=` | Headers, redirect chain, metadata, certificate, header audit |
-| `GET` | `/api/tls?host=&port=` | Certificate details via Certificate Transparency |
+| `GET` | `/api/tls?host=&port=` | Certificate details (SSL Labs cache → Certificate Transparency) |
 | `GET` | `/api/dns?name=&type=` | Server-side DNS over DoH |
 | `GET` | `/api/smtp?host=&port=&mode=` | Banner, EHLO capabilities, STARTTLS — read-only |
 | `GET` | `/api/port?host=&port=` | Single TCP port reachability |
 
-Runtime notes: TLS comes from Certificate Transparency (Workers cannot read peer certificates, so
-`version`/`cipher` are empty); outbound port 25 is blocked by Cloudflare, so SMTP probing uses 465/587/2525; the
-rate limiter is per-isolate. Leave **Settings → Inspector API** empty to use this origin, or point it at an
+Runtime notes: Workers cannot read peer certificates, so TLS details are reconstructed — first from the SSL Labs
+cached analysis (fast for public hosts), then from Certificate Transparency (`crt.sh`), with successful lookups
+cached for an hour; `version`/`cipher` stay empty when the data comes from a log. Outbound port 25 is blocked by
+Cloudflare, so SMTP probing uses 465/587/2525, and Cloudflare-owned IP ranges cannot be dialled at all. The rate
+limiter is per-isolate. Leave **Settings → Inspector API** empty to use this origin, or point it at an
 absolute URL to use another instance. The legacy Flask app in `../pyapp` still implements the same contract for
 self-hosting.
 

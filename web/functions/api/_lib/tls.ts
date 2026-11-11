@@ -13,6 +13,7 @@
 
 import { errorMessage, isTimeoutError, readCappedBytes } from './util';
 import { isIP } from './ip';
+import { sslLabsInfo } from './ssllabs';
 
 export interface TlsDetails {
   subject: string;
@@ -262,6 +263,14 @@ export async function tlsInfo(host: string, port = 443, options: TlsLookupOption
     if (!asciiHost) throw new Error('no hostname was supplied.');
     const cached = await readCache(asciiHost);
     if (cached) return cached;
+
+    // SSL Labs keeps public analyses online and answers in ~1-2 s when a host
+    // is already analysed, so it is the fast path; CT below is the fallback.
+    const fromSslLabs = await sslLabsInfo(asciiHost, port || 443);
+    if (fromSslLabs) {
+      await writeCache(asciiHost, fromSslLabs);
+      return fromSslLabs;
+    }
 
     const now = Date.now();
     const collect = (rows: CrtShRow[]): Candidate[] => {

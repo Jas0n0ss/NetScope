@@ -7,6 +7,9 @@
   [Quick start](#quick-start) · [Features](#features) · [API](#api) · [Security](#security--privacy) · [Deployment](#deployment)
 </div>
 
+
+> **Vite rewrite:** a new React + Tailwind build of this console lives in [`web/`](web/README.md) — English/Chinese copy, dark and light themes, seven views, static Cloudflare Pages deploy. The original app below is unchanged and still runnable.
+
 ![NetScope overview — dark theme](docs/screenshots/overview-dark.png)
 
 ## Highlights

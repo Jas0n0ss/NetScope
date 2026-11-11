@@ -1,0 +1,16 @@
+{
+  "name": "NetScope — Network Toolbox",
+  "short_name": "NetScope",
+  "description": "Public IP, DNS, RDAP, email authentication and network math in one dark console.",
+  "start_url": "/#/overview",
+  "display": "standalone",
+  "background_color": "#060708",
+  "theme_color": "#060708",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

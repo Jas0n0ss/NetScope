@@ -18,5 +18,9 @@ npm-debug.log*
 .vscode/
 
 # Local artifacts
+web/dist/
 docs/screenshots/*.tmp.png
 *.log
+
+# TypeScript build cache
+*.tsbuildinfo

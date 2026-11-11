@@ -79,6 +79,11 @@ Errors use the Flask envelope with an appropriate status:
   `port=25` returns `reachable: false` with
   `"Port 25 is blocked by Cloudflare Workers. Use 465, 587 or 2525."` without
   attempting a connection.
+- **Cloudflare-owned IP ranges cannot be reached over TCP** from Workers either.
+  `/api/port` and `/api/smtp` against a host that resolves into a Cloudflare
+  range (for example `1.1.1.1`, or any origin behind the Cloudflare proxy) fail
+  at connect time; the API maps the runtime's `proxy request failed` error to a
+  readable message.
 - SMTP connects to the **hostname**, not the pre-resolved IP, because Workers
   cannot set SNI separately from the connect target (`startTls()` rejects a
   certificate that is not valid for the address it dialled). SSRF is still
@@ -92,8 +97,7 @@ Errors use the Flask envelope with an appropriate status:
   substituted when missing.
 - SMTP capability parsing, warning strings, DNS status text and error codes are
   copied from `pyapp/app.py`. `capabilities` is the Flask object (not an array);
-  `Email.tsx` currently checks `Array.isArray(smtp.capabilities)` before
-  rendering chips, so the UI will not show them without a frontend tweak.
+  `Email.tsx` flattens `extensions` + `AUTH <mechanism>` into chips.
 - The per-isolate limiter is not shared between `/api/*` and `/ip` modules.
 
 ## Running locally

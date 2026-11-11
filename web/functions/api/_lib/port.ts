@@ -11,6 +11,9 @@ function connectionError(error: unknown): string {
   if (isTimeoutError(error)) return 'Connection timed out.';
   const message = errorMessage(error).trim();
   if (/refused/i.test(message)) return 'Connection refused.';
+  if (/proxy request failed|cannot connect to the specified address/i.test(message)) {
+    return 'Cloudflare Workers cannot reach Cloudflare-owned IP ranges over TCP. Try a host that is not proxied by Cloudflare.';
+  }
   if (/timed?\s?out|timeout/i.test(message)) return 'Connection timed out.';
   return message || 'Connection failed.';
 }

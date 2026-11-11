@@ -469,7 +469,11 @@ export function apiUrl(path: string): string {
 let healthCache: { ts: number; base: string; result: ApiHealth } | null = null;
 
 export async function healthCheck(force = false): Promise<ApiHealth> {
-  const base = getApiBase();
+  // No stored base means "same origin": the Pages deployment serves the API itself
+  // at /api/*. A bare static host simply answers 404 and the UI stays in local mode.
+  const configured = getApiBase();
+  const base =
+    configured || (typeof location !== 'undefined' && location.origin.startsWith('http') ? location.origin : '');
   if (!base) return { online: false, base, error: 'No inspector API configured.' };
   if (!force && healthCache && healthCache.base === base && Date.now() - healthCache.ts < 15000) return healthCache.result;
 
@@ -480,7 +484,11 @@ export async function healthCheck(force = false): Promise<ApiHealth> {
     healthCache = { ts: Date.now(), base, result };
     return result;
   } catch (error) {
-    const result: ApiHealth = { online: false, base, error: (error as Error).message };
+    const result: ApiHealth = {
+      online: false,
+      base,
+      error: configured ? (error as Error).message : 'No inspector API configured.',
+    };
     healthCache = { ts: Date.now(), base, result };
     return result;
   }

@@ -6,7 +6,7 @@ import { CommandPalette } from './components/CommandPalette';
 import { SettingsDialog } from './components/SettingsDialog';
 import { Toaster, toast } from './components/toast';
 import { healthCheck, myAddresses } from './lib/net';
-import { clearDnsHistory, clearHistory, getApiBase } from './lib/store';
+import { clearDnsHistory, clearHistory } from './lib/store';
 import { copyText } from './lib/format';
 import { VIEWS, viewById, type ViewId } from './lib/views';
 import { useT } from './lib/i18n';
@@ -48,7 +48,7 @@ export function App() {
     myAddresses()
       .then((addresses) => setIp(addresses.ipv4 || addresses.ipv6))
       .catch(() => setIp(null));
-    if (getApiBase()) healthCheck(true).then((health) => setApiOnline(health.online));
+    healthCheck(true).then((health) => setApiOnline(health.online));
   }, []);
 
   useEffect(() => {

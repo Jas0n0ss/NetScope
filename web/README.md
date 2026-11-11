@@ -74,36 +74,47 @@ Node 18+ recommended.
 
 ## Deploy to Cloudflare Pages
 
+Live: **https://netscope-160.pages.dev** (Pages project `netscope`, production branch `main`).
+
+**CLI** — Wrangler is a dev dependency, so no global install is needed:
+
+```bash
+npm run deploy     # build + wrangler pages deploy dist
+```
+
 **Dashboard** — create a Pages project from this repository:
 
 - Root directory: `web`
 - Build command: `npm run build`
 - Build output: `dist`
 
-**CLI**
-
-```bash
-cd web
-npm run build
-npx wrangler pages deploy dist --project-name netscope
-```
-
 `wrangler.toml` already pins `pages_build_output_dir = "dist"`, and `public/_headers` sets immutable caching for
 hashed assets plus `no-referrer` / `nosniff` / locked-down permissions.
 
-## Optional inspector API
+## Inspector API (Cloudflare Workers)
 
-Website inspection, SMTP probing and TCP port checks need the bundled Flask backend (`../pyapp`). Without it the
-UI stays fully usable and marks those panels as `REQUIRES API`.
+Website inspection, SMTP probing and TCP port checks run on the same origin under `/api/*`, served by Pages
+Functions in [`functions/`](functions/README.md) — no separate backend or configuration needed:
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/health` · `/api/features` | Service heartbeat and capability list |
+| `GET` | `/api/ip` · `/ip` | Client public IP (JSON / plain text) |
+| `GET` | `/api/inspect?url=` | Headers, redirect chain, metadata, certificate, header audit |
+| `GET` | `/api/tls?host=&port=` | Certificate details via Certificate Transparency |
+| `GET` | `/api/dns?name=&type=` | Server-side DNS over DoH |
+| `GET` | `/api/smtp?host=&port=&mode=` | Banner, EHLO capabilities, STARTTLS — read-only |
+| `GET` | `/api/port?host=&port=` | Single TCP port reachability |
+
+Runtime notes: TLS comes from Certificate Transparency (Workers cannot read peer certificates, so
+`version`/`cipher` are empty); outbound port 25 is blocked by Cloudflare, so SMTP probing uses 465/587/2525; the
+rate limiter is per-isolate. Leave **Settings → Inspector API** empty to use this origin, or point it at an
+absolute URL to use another instance. The legacy Flask app in `../pyapp` still implements the same contract for
+self-hosting.
 
 ```bash
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r pyapp/requirements.txt
-flask --app pyapp.app run -p 8080
+npm run dev:api     # wrangler pages dev dist — serves dist/ + the API locally
 ```
-
-Open **Settings** (or `⌘K` → Settings), set the API base to `http://localhost:8080`, and hit **Test**. The value
-is stored in `localStorage`; health is cached for 15 s.
 
 ## Privacy model
 

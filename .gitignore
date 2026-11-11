@@ -24,3 +24,8 @@ docs/screenshots/*.tmp.png
 
 # TypeScript build cache
 *.tsbuildinfo
+
+# Wrangler local auth/config (contains OAuth tokens)
+.wrangler-home/
+.npm-cache/
+web/.wrangler/

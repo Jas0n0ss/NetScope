@@ -23,6 +23,15 @@ const statusTone = (status: 'pass' | 'warn' | 'fail') =>
 const statusIcon = (status: 'pass' | 'warn' | 'fail') =>
   status === 'pass' ? ShieldCheck : status === 'warn' ? ShieldAlert : ShieldAlert;
 
+/** The API reports EHLO capabilities as an object; older builds returned a flat list. */
+const capabilityChips = (payload: any): string[] => {
+  const caps = payload?.capabilities;
+  if (Array.isArray(caps)) return caps;
+  const extensions = Array.isArray(caps?.extensions) ? caps.extensions : [];
+  const auth = Array.isArray(caps?.auth) ? caps.auth.map((mechanism: string) => `AUTH ${mechanism}`) : [];
+  return [...extensions, ...auth];
+};
+
 export function Email() {
   const t = useT();
   const [domain, setDomain] = useState('');
@@ -32,7 +41,7 @@ export function Email() {
   const [report, setReport] = useState<EmailReport | null>(null);
   const [digOpen, setDigOpen] = useState(false);
   const [smtpHost, setSmtpHost] = useState('');
-  const [smtpPort, setSmtpPort] = useState('25');
+  const [smtpPort, setSmtpPort] = useState('587');
   const [smtp, setSmtp] = useState<any>(null);
   const [smtpError, setSmtpError] = useState<string | null>(null);
   const [smtpLoading, setSmtpLoading] = useState(false);
@@ -341,7 +350,7 @@ export function Email() {
           />
           <input
             className="input"
-            placeholder="25"
+            placeholder="587"
             value={smtpPort}
             onChange={(event) => setSmtpPort(event.target.value)}
             spellCheck={false}
@@ -351,7 +360,7 @@ export function Email() {
           </button>
         </div>
         <p className="mt-2.5 text-[11.5px] leading-relaxed text-muted">
-          {t('Reads the banner, EHLO capabilities and STARTTLS certificate. No credentials or messages are sent. Needs the Flask inspector API — configure it in Settings.')}
+          {t('Reads the banner, EHLO capabilities and STARTTLS certificate. No credentials or messages are sent. Runs on the NetScope API served from this site.')}
         </p>
 
         {smtpError && (
@@ -368,9 +377,9 @@ export function Email() {
               {smtp.elapsed_ms !== undefined && <span className="font-mono text-[10px] text-dim">{smtp.elapsed_ms} ms</span>}
             </div>
             <p className="break-all font-mono text-[10.5px] text-muted">{smtp.banner || t('No banner returned.')}</p>
-            {Array.isArray(smtp.capabilities) && smtp.capabilities.length > 0 && (
+            {capabilityChips(smtp).length > 0 && (
               <div className="flex flex-wrap gap-1">
-                {smtp.capabilities.map((cap: string) => (
+                {capabilityChips(smtp).map((cap: string) => (
                   <span key={cap} className="border border-line px-1.5 py-0.5 font-mono text-[9px] text-dim">
                     {cap}
                   </span>

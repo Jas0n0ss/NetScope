@@ -252,8 +252,8 @@ const ZH: Record<string, string> = {
   'lookups · dns': '查询 · DNS',
   'Inspector API connected': '检测 API 已连接',
   'API unreachable': 'API 无法访问',
-  'Website inspection, SMTP probes and TCP port checks need the Flask backend. Everything else runs entirely in this browser. Leave empty for a pure static deploy.':
-    '网站检测、SMTP 探测和 TCP 端口检查需要 Flask 后端；其余功能全部在浏览器本地运行。留空即为纯静态部署。',
+  'Website inspection, SMTP probes and TCP port checks run on the NetScope API. Leave empty to use this origin (/api); set an absolute URL to point at another instance. Everything else runs entirely in this browser.':
+    '网站检测、SMTP 探测和 TCP 端口检查由 NetScope API 完成。留空即使用当前域名下的 /api；填写绝对地址可指向其他实例。其余功能全部在浏览器本地运行。',
   'Lookups and DNS history live in localStorage on this device only. Nothing is uploaded.':
     '查询与 DNS 历史只保存在本机 localStorage，不会上传。',
   'No analytics, no cookies, no server-side logging. DNS queries go straight to Cloudflare or Google over DoH; geolocation uses public IP databases.':
@@ -457,8 +457,8 @@ const ZH: Record<string, string> = {
   'requires api': '需要 API',
   Connecting: '连接中',
   Probe: '探测',
-  'Reads the banner, EHLO capabilities and STARTTLS certificate. No credentials or messages are sent. Needs the Flask inspector API — configure it in Settings.':
-    '读取 banner、EHLO 能力与 STARTTLS 证书。不发送任何凭据或邮件。需要 Flask 检测 API —— 在设置中配置。',
+  'Reads the banner, EHLO capabilities and STARTTLS certificate. No credentials or messages are sent. Runs on the NetScope API served from this site.':
+    '读取 banner、EHLO 能力与 STARTTLS 证书。不发送任何凭据或邮件。由本站的 NetScope API 完成。',
   reachable: '可达',
   unreachable: '不可达',
   'No banner returned.': '未返回 banner。',

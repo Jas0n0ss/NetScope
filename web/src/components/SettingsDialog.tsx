@@ -71,7 +71,7 @@ export function SettingsDialog({
               </Badge>
             </div>
             <p className="mb-2 text-[11.5px] leading-relaxed text-muted">
-              {t('Website inspection, SMTP probes and TCP port checks need the Flask backend. Everything else runs entirely in this browser. Leave empty for a pure static deploy.')}
+              {t('Website inspection, SMTP probes and TCP port checks run on the NetScope API. Leave empty to use this origin (/api); set an absolute URL to point at another instance. Everything else runs entirely in this browser.')}
             </p>
             <div className="flex gap-2">
               <input

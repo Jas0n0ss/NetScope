@@ -54,9 +54,9 @@ interface Candidate {
   notAfter: number;
 }
 
-const CRT_SH_TIMEOUT = 6000;
+const CRT_SH_TIMEOUT = 10000;
 const CRT_SH_MAX_BYTES = 4 * 1024 * 1024;
-const CRT_SH_FINGERPRINT_TIMEOUT = 4000;
+const CRT_SH_FINGERPRINT_TIMEOUT = 4500;
 const USER_AGENT = 'NetScope/2.1 (+https://github.com/Jas0n0ss/lsp)';
 
 function parseCrtDate(value: string | undefined): number | null {
@@ -120,7 +120,10 @@ function base64ToBytes(value: string): Uint8Array {
 }
 
 async function fetchCrtShRowsOnce(host: string, timeoutMs: number): Promise<CrtShRow[]> {
-  const url = `https://crt.sh/?q=${encodeURIComponent(host)}&output=json`;
+  // `exclude=expired` and `deduplicate=Y` shrink the payload by an order of
+  // magnitude (github.com: 1225 rows / 416 KB → 33 rows / 11 KB) and cut the
+  // chance of a truncated or rate-limited response.
+  const url = `https://crt.sh/?q=${encodeURIComponent(host)}&output=json&exclude=expired&deduplicate=Y`;
   let response: Response;
   try {
     response = await fetch(url, {
@@ -205,6 +208,47 @@ export interface TlsLookupOptions {
   fingerprintTimeoutMs?: number;
 }
 
+const CACHE_PREFIX = 'https://netscope-ct-cache.invalid/';
+const CACHE_TTL_SECONDS = 3600;
+
+/**
+ * crt.sh rate-limits bursty clients, so successful lookups are kept in the
+ * per-colo Cache API for an hour. Errors are never cached, so a transient
+ * failure can be retried immediately.
+ */
+function edgeCache(): Cache | null {
+  const globalCaches = (globalThis as { caches?: CacheStorage }).caches;
+  const store = (globalCaches as unknown as { default?: Cache } | undefined)?.default;
+  return store ?? null;
+}
+
+async function readCache(host: string): Promise<TlsDetails | null> {
+  try {
+    const store = edgeCache();
+    if (!store) return null;
+    const hit = await store.match(new Request(`${CACHE_PREFIX}${encodeURIComponent(host)}`));
+    if (!hit) return null;
+    return (await hit.json()) as TlsDetails;
+  } catch {
+    return null;
+  }
+}
+
+async function writeCache(host: string, details: TlsDetails): Promise<void> {
+  try {
+    const store = edgeCache();
+    if (!store) return;
+    await store.put(
+      new Request(`${CACHE_PREFIX}${encodeURIComponent(host)}`),
+      new Response(JSON.stringify(details), {
+        headers: { 'content-type': 'application/json', 'cache-control': `public, max-age=${CACHE_TTL_SECONDS}` },
+      }),
+    );
+  } catch {
+    /* caching is optional */
+  }
+}
+
 /**
  * Look up certificate details for `host` in Certificate Transparency logs.
  * Never throws: failures come back as `{ error: "..." }`.
@@ -217,19 +261,37 @@ export async function tlsInfo(host: string, port = 443, options: TlsLookupOption
 
   try {
     if (!asciiHost) throw new Error('no hostname was supplied.');
-    const rows = await fetchCrtShRows(asciiHost, timeoutMs);
+    const cached = await readCache(asciiHost);
+    if (cached) return cached;
 
     const now = Date.now();
-    const candidates: Candidate[] = [];
-    for (const row of rows) {
-      if (!rowCoversHost(row, asciiHost)) continue;
-      const notBefore = parseCrtDate(row.not_before);
-      const notAfter = parseCrtDate(row.not_after);
-      if (notBefore === null || notAfter === null) continue;
-      if (notAfter <= now) continue;
-      // Allow a little clock skew for certificates issued moments ago.
-      if (notBefore > now + 5 * 60 * 1000) continue;
-      candidates.push({ row, notBefore, notAfter });
+    const collect = (rows: CrtShRow[]): Candidate[] => {
+      const found: Candidate[] = [];
+      for (const row of rows) {
+        if (!rowCoversHost(row, asciiHost)) continue;
+        const notBefore = parseCrtDate(row.not_before);
+        const notAfter = parseCrtDate(row.not_after);
+        if (notBefore === null || notAfter === null) continue;
+        if (notAfter <= now) continue;
+        // Allow a little clock skew for certificates issued moments ago.
+        if (notBefore > now + 5 * 60 * 1000) continue;
+        found.push({ row, notBefore, notAfter });
+      }
+      return found;
+    };
+
+    let candidates = collect(await fetchCrtShRows(asciiHost, timeoutMs));
+    if (candidates.length === 0) {
+      // A wildcard certificate is logged under the parent name, so
+      // `www.example.com` only shows up in a `example.com` search.
+      const parent = asciiHost.split('.').slice(1).join('.');
+      if (parent.includes('.')) {
+        try {
+          candidates = collect(await fetchCrtShRows(parent, timeoutMs));
+        } catch {
+          /* keep the original "not found" failure below */
+        }
+      }
     }
 
     if (candidates.length === 0) {
@@ -255,7 +317,7 @@ export async function tlsInfo(host: string, port = 443, options: TlsLookupOption
       fingerprint = await fetchFingerprint(chosen.row.id, options.fingerprintTimeoutMs ?? CRT_SH_FINGERPRINT_TIMEOUT);
     }
 
-    return {
+    const details: TlsDetails = {
       subject: String(chosen.row.common_name ?? ''),
       issuer: String(chosen.row.issuer_name ?? ''),
       valid_from: isoUtc(chosen.notBefore),
@@ -268,6 +330,8 @@ export async function tlsInfo(host: string, port = 443, options: TlsLookupOption
       cipher: '',
       source: 'certificate-transparency',
     };
+    await writeCache(asciiHost, details);
+    return details;
   } catch (error) {
     const reason = errorMessage(error).trim().replace(/\.+$/, '');
     return { error: `Certificate details are unavailable: ${reason}.` };

@@ -3,7 +3,7 @@ import { Command, Menu, Moon, Settings2, Sun } from 'lucide-react';
 import { localClock } from '../lib/format';
 import type { ViewMeta } from '../lib/views';
 import { useLang, useT, toggleLang } from '../lib/i18n';
-import { useTheme, toggleTheme } from '../lib/theme';
+import { useResolvedTheme, toggleTheme } from '../lib/theme';
 
 export function TopBar({
   view,
@@ -22,7 +22,7 @@ export function TopBar({
 }) {
   const t = useT();
   const lang = useLang();
-  const theme = useTheme();
+  const theme = useResolvedTheme();
   const [clock, setClock] = useState(() => localClock());
 
   useEffect(() => {

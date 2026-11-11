@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Database, Languages, Moon, Server, ShieldCheck, Sun, Trash2, X } from 'lucide-react';
+import { Database, Languages, Monitor, Moon, Server, ShieldCheck, Sun, Trash2, X } from 'lucide-react';
 import { healthCheck, invalidateHealthCache } from '../lib/net';
 import { getApiBase, setApiBase } from '../lib/store';
 import { Badge } from './ui';
@@ -151,14 +151,14 @@ export function SettingsDialog({
               </div>
               <div>
                 <p className="label mb-1.5">{t('Theme')}</p>
-                <div className="grid grid-cols-2 gap-px bg-line">
-                  {([['dark', 'Dark', Moon], ['light', 'Light', Sun]] as const).map(([code, label, Icon]) => (
+                <div className="grid grid-cols-3 gap-px bg-line">
+                  {([['system', 'System', Monitor], ['dark', 'Dark', Moon], ['light', 'Light', Sun]] as const).map(([code, label, Icon]) => (
                     <button
                       key={code}
                       type="button"
                       onClick={() => setTheme(code)}
                       className={cn(
-                        'flex items-center justify-center gap-1.5 px-3 py-2 font-mono text-[11px] transition-colors',
+                        'flex items-center justify-center gap-1 whitespace-nowrap px-2 py-2 font-mono text-[10.5px] transition-colors',
                         theme === code ? 'bg-acid/10 text-acid' : 'bg-panel text-muted hover:text-ink',
                       )}
                       aria-pressed={theme === code}

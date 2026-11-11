@@ -12,7 +12,7 @@ const detect = (): Lang => {
   } catch {
     /* storage may be unavailable */
   }
-  return typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('zh') ? 'zh' : 'en';
+  return 'en';
 };
 
 let current: Lang = detect();
@@ -102,6 +102,7 @@ export function toolNote(note: string, t: TFn): string {
 }
 
 const ZH: Record<string, string> = {
+  'System': '跟随系统',
   'This network': '本网络',
   'IPv4-compatible (deprecated)': 'IPv4 兼容（已废弃）',
   'IPv4-mapped': 'IPv4 映射',

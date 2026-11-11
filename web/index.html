@@ -8,13 +8,28 @@
       name="description"
       content="NetScope is a fast, private network toolbox: public IP, geolocation, DNS over HTTPS, RDAP, email authentication, subnet math and browser signals — all in one geek console."
     />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="dark light" />
     <meta name="theme-color" content="#060708" />
     <meta property="og:title" content="NetScope — Network Toolbox" />
     <meta property="og:description" content="Public IP, DNS, RDAP, email auth and network math in a single dark console." />
     <meta property="og:type" content="website" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="/site.webmanifest" />
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('netscope.v2.theme');
+          var mode = stored === 'dark' || stored === 'light' ? stored : 'system';
+          var resolved = mode === 'system'
+            ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+            : mode;
+          document.documentElement.dataset.theme = resolved;
+          document.documentElement.style.colorScheme = resolved;
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', resolved === 'light' ? '#f3f4ef' : '#060708');
+        } catch (error) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

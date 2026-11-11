@@ -44,16 +44,18 @@ top bar (`中` / `EN`, sun / moon) or from **Settings → Locale preferences**.
 
 | Preference | Values | Storage key | Default |
 | --- | --- | --- | --- |
-| Language | `en` / `zh` | `netscope.v2.lang` | `navigator.language` starting with `zh`, else English |
-| Theme | `dark` / `light` | `netscope.v2.theme` | `dark` |
+| Language | `en` / `zh` | `netscope.v2.lang` | English |
+| Theme | `system` / `dark` / `light` | `netscope.v2.theme` | `system` (follows `prefers-color-scheme`) |
 
 - Copy is translated through a tiny store (`src/lib/i18n.ts`): the English sentence is the dictionary key, so a
   missing translation falls back to English instead of an empty string. `useT()` re-renders the whole tree on
-  switch, and `document.documentElement.lang` follows (`zh-CN` / `en`).
+  switch, and `document.documentElement.lang` follows (`zh-CN` / `en`). English is the default regardless of system
+  language; a saved choice wins.
 - Colours are CSS variables in `src/index.css` exposed through Tailwind tokens (`bg-panel`, `text-ink`,
   `border-line`…). `html[data-theme="light"]` swaps the palette: paper-white surfaces with near-black accents,
-  while semantic teal / amber / danger / sky are darkened for contrast. The theme is applied before first paint
-  to avoid a flash, and `theme-color` is kept in sync.
+  while semantic teal / amber / danger / sky are darkened for contrast. The default `system` mode follows
+  `prefers-color-scheme` live; explicit `dark` / `light` pins the choice. The theme is applied by an inline
+  pre-paint script to avoid a flash, and `theme-color` stays in sync.
 
 ![Overview in light theme, Chinese](docs/screenshots/overview-light-zh.png)
 ![DNS in light theme, Chinese](docs/screenshots/dns-light-zh.png)

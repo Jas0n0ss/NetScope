@@ -173,7 +173,11 @@ The API test suite (34 tests) covers static allowlisting, CORS, IP forwarding, S
 
 ## Deployment
 
-The included workflow builds and pushes a multi-arch image to GHCR:
+**Live console:** <https://lsp.404x.io> — the React build in `web/` is published to Cloudflare Pages by
+[`.github/workflows/pages.yml`](.github/workflows/pages.yml) on every push to `main`, together with a Workers
+API (`web/functions/`) that powers website inspection, SMTP probing and TCP port checks on the same origin.
+
+The included Docker workflow builds and pushes a multi-arch image to GHCR:
 
 ```bash
 docker pull ghcr.io/jas0n0ss/webip:latest

@@ -487,8 +487,8 @@ const ZH: Record<string, string> = {
   'headers · tls · metadata': '响应头 · TLS · 元数据',
   'inspector api required': '需要检测 API',
   'Headers, TLS and metadata need a server.': '响应头、TLS 与元数据需要服务端。',
-  'Browsers cannot read cross-origin response headers or inspect a certificate chain. NetScope keeps that work behind its own hardened Flask endpoint, so the static build stays a pure client. Point it at any NetScope API instance in Settings to unlock this view.':
-    '浏览器无法读取跨域响应头或检查证书链。NetScope 把这些工作放在自带的加固 Flask 端点后面，静态构建保持纯客户端。在设置中填入任意 NetScope API 实例即可解锁。',
+  'Browsers cannot read cross-origin response headers or inspect a certificate chain. NetScope keeps that work behind its own hardened API endpoint, so the page stays a pure client. Point it at any NetScope API instance in Settings to unlock this view.':
+    '浏览器无法读取跨域响应头或检查证书链。NetScope 把这些工作放在自带的加固 API 端点后面，页面保持纯客户端。在设置中填入任意 NetScope API 实例即可解锁。',
   'Configure API': '配置 API',
   'Use local DNS': '使用本地 DNS',
   'service heartbeat': '服务心跳',

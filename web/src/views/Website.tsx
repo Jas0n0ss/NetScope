@@ -92,7 +92,7 @@ export function Website({ apiOnline, onOpenSettings }: { apiOnline: boolean; onO
             <div>
               <h3 className="text-[17px] leading-tight text-ink">{t('Headers, TLS and metadata need a server.')}</h3>
               <p className="mt-2 max-w-lg text-[12.5px] leading-relaxed text-muted">
-                {t('Browsers cannot read cross-origin response headers or inspect a certificate chain. NetScope keeps that work behind its own hardened Flask endpoint, so the static build stays a pure client. Point it at any NetScope API instance in Settings to unlock this view.')}
+                {t('Browsers cannot read cross-origin response headers or inspect a certificate chain. NetScope keeps that work behind its own hardened API endpoint, so the page stays a pure client. Point it at any NetScope API instance in Settings to unlock this view.')}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <button type="button" className="btn btn-primary" onClick={onOpenSettings}>

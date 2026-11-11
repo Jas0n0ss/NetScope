@@ -54,7 +54,7 @@ interface Candidate {
   notAfter: number;
 }
 
-const CRT_SH_TIMEOUT = 10000;
+const CRT_SH_TIMEOUT = 8000;
 const CRT_SH_MAX_BYTES = 4 * 1024 * 1024;
 const CRT_SH_FINGERPRINT_TIMEOUT = 4500;
 const USER_AGENT = 'NetScope/2.1 (+https://github.com/Jas0n0ss/lsp)';
@@ -151,15 +151,14 @@ async function fetchCrtShRowsOnce(host: string, timeoutMs: number): Promise<CrtS
 }
 
 /**
- * crt.sh intermittently answers 502 (and occasionally HTML). A single retry
- * turns most of those transient failures into a usable response. Timeouts are
- * not retried so the overall 6 s budget stays intact.
+ * crt.sh is slow and intermittently answers 502/HTML, so every failure is
+ * retried once: two 8 s attempts stay well inside the 30 s Worker limit and
+ * turn the majority of transient failures into a usable response.
  */
 async function fetchCrtShRows(host: string, timeoutMs: number): Promise<CrtShRow[]> {
   try {
     return await fetchCrtShRowsOnce(host, timeoutMs);
-  } catch (error) {
-    if (errorMessage(error).toLowerCase().includes('timed out')) throw error;
+  } catch {
     return fetchCrtShRowsOnce(host, timeoutMs);
   }
 }

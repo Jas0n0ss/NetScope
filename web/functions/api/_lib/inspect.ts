@@ -224,7 +224,7 @@ export async function inspectUrl(rawUrl: string): Promise<Record<string, unknown
       if (remainingBudget < 1500) {
         tls = { error: 'Certificate details are unavailable: the inspection timed out before the TLS lookup.' };
       } else {
-        const timeoutMs = Math.min(9000, Math.max(1000, remainingBudget - 1000));
+        const timeoutMs = Math.min(8000, Math.max(1000, Math.floor((remainingBudget - 1000) / 2)));
         const withFingerprint = remainingBudget > 9000;
         tls = await tlsInfo(hostname, targetPort, {
           timeoutMs,
